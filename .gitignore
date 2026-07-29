@@ -1,15 +1,15 @@
-  # macOS
-  .DS_Store
+# macOS
+.DS_Store
 
-  # IDE
-  .idea/
-  *.iml
-  .vscode/
+# IDE
+.idea/
+*.iml
+.vscode/
 
-  # Maven
-  **/target/
+# Maven
+**/target/
 
-  # Local environment and secrets
-  .env
-  .env.*
-  !.env.example
+# Local environment and secrets
+.env
+.env.*
+!.env.example

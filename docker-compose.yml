@@ -1,0 +1,23 @@
+services:
+  user-postgres:
+    image: postgres:18-alpine
+    ports:
+      - "${USER_DB_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: "${USER_DB_NAME:-users}"
+      POSTGRES_USER: "${USER_DB_USERNAME:-user_service}"
+      POSTGRES_PASSWORD: "${USER_DB_PASSWORD:-user_service_dev}"
+    volumes:
+      - user_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  user_postgres_data:

@@ -19,5 +19,26 @@ services:
       timeout: 5s
       retries: 10
 
+  product-postgres:
+    image: postgres:18-alpine
+    ports:
+      - "${PRODUCT_DB_PORT:-5434}:5432"
+    environment:
+      POSTGRES_DB: "${PRODUCT_DB_NAME:-products}"
+      POSTGRES_USER: "${PRODUCT_DB_USERNAME:-product_service}"
+      POSTGRES_PASSWORD: "${PRODUCT_DB_PASSWORD:-product_service_dev}"
+    volumes:
+      - product_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   user_postgres_data:
+  product_postgres_data:

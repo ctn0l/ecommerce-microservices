@@ -108,7 +108,7 @@ class ProductServiceTest {
         Product existingProduct = productMapper.toEntity(
                 request("Notebook", new BigDecimal("999.99"))
         );
-        when(productRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(existingProduct));
         when(productRepository.saveAndFlush(existingProduct)).thenReturn(existingProduct);
 
         Optional<ProductResponse> response = productService.updateProduct(
@@ -124,7 +124,7 @@ class ProductServiceTest {
 
     @Test
     void returnsEmptyWhenProductToUpdateDoesNotExist() {
-        when(productRepository.findByIdAndActiveTrue(99L)).thenReturn(Optional.empty());
+        when(productRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
         Optional<ProductResponse> response = productService.updateProduct(
                 99L,
@@ -138,7 +138,7 @@ class ProductServiceTest {
     @Test
     void deactivatesExistingProductInsteadOfDeletingIt() {
         Product product = productMapper.toEntity(request("Notebook", new BigDecimal("999.99")));
-        when(productRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(product));
         when(productRepository.saveAndFlush(product)).thenReturn(product);
 
         boolean deleted = productService.deleteProduct(1L);
@@ -151,7 +151,7 @@ class ProductServiceTest {
 
     @Test
     void doesNotDeactivateMissingProduct() {
-        when(productRepository.findByIdAndActiveTrue(99L)).thenReturn(Optional.empty());
+        when(productRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
         assertThat(productService.deleteProduct(99L)).isFalse();
         verify(productRepository, never()).saveAndFlush(any(Product.class));

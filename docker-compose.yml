@@ -39,6 +39,23 @@ services:
       timeout: 5s
       retries: 10
 
+  order-postgres:
+    image: postgres:18-alpine
+    ports:
+      - "${ORDER_DB_PORT:-5435}:5432"
+    environment:
+      POSTGRES_DB: "${ORDER_DB_NAME:-orders}"
+      POSTGRES_USER: "${ORDER_DB_USERNAME:-order_service}"
+      POSTGRES_PASSWORD: "${ORDER_DB_PASSWORD:-order_service_dev}"
+    volumes:
+      - order_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   user_postgres_data:
   product_postgres_data:
+  order_postgres_data:

@@ -7,6 +7,8 @@ import com.app.product_service.model.Product;
 import com.app.product_service.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -47,8 +49,15 @@ public class ProductService {
 
     @Transactional
     public Optional<ProductResponse> updateProduct(Long id, ProductRequest productRequest) {
-        return productRepository.findByIdAndActiveTrue(id)
+        return productRepository.findByIdForUpdate(id)
+                .filter(product -> Boolean.TRUE.equals(product.getActive()))
                 .map(existingProduct -> {
+                    if (!existingProduct.getStockQuantity().equals(productRequest.stockQuantity())
+                            && productRepository.hasActiveReservations(id)) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Cannot replace stock quantity while reservations are pending");
+                    }
                     productMapper.updateEntity(productRequest, existingProduct);
                     Product savedProduct = productRepository.saveAndFlush(existingProduct);
                     return productMapper.toResponse(savedProduct);
@@ -57,7 +66,8 @@ public class ProductService {
 
     @Transactional
     public boolean deleteProduct(Long id) {
-        return productRepository.findByIdAndActiveTrue(id)
+        return productRepository.findByIdForUpdate(id)
+                .filter(product -> Boolean.TRUE.equals(product.getActive()))
                 .map(product -> {
                     product.setActive(false);
                     productRepository.saveAndFlush(product);
